@@ -24,9 +24,11 @@
 
 package com.github.mjeanroy.junit.servers.servers;
 
-import com.github.mjeanroy.junit.servers.servers.configuration.AbstractConfiguration;
+import java.net.URI;
 
 import javax.servlet.ServletContext;
+
+import com.github.mjeanroy.junit.servers.servers.configuration.AbstractConfiguration;
 
 /**
  * Specification of embedded server.
@@ -75,7 +77,29 @@ public interface EmbeddedServer<T extends AbstractConfiguration> {
 	boolean isStarted();
 
 	/**
+	 * Get the protocol scheme ({@code "http"}, {@code "https"}).
+	 *
+	 * @return Protocol scheme.
+	 */
+	String getScheme();
+
+	/**
+	 * Get the host, should be {@code "localhost"}, unless specific configuration.
+	 *
+	 * @return The server hostname.
+	 */
+	String getHost();
+
+	/**
 	 * Get port used by embedded server.
+	 *
+	 * <p>
+	 *
+	 * Note that:
+	 * <ul>
+	 *   <li>If the server is not started, the returned port should be the one set in the configuration.</li>
+	 *   <li>Otherwise, the "real" port should be returned (the port used by the embedded server)</li>
+	 * </ul>
 	 *
 	 * @return Port.
 	 */
@@ -84,6 +108,11 @@ public interface EmbeddedServer<T extends AbstractConfiguration> {
 	/**
 	 * Get server context path.
 	 *
+	 * <p>
+	 *
+	 * It is not guaranteed that the returned server path here is URL encoded. If you need to query
+	 * embedded server, use {@link #getUrl()} or {@link #getUri()}.
+	 *
 	 * @return Server context path.
 	 */
 	String getPath();
@@ -91,9 +120,22 @@ public interface EmbeddedServer<T extends AbstractConfiguration> {
 	/**
 	 * Get URL to query embedded server.
 	 *
+	 * <p>
+	 *
+	 * Implementations <strong>must</strong> return a valid URL: for example, it means that the context path must be
+	 * URL encoded if it contains illegal characters (such as space for example). Usually, this method should
+	 * return the result of {@link #getUri()#toString()}.
+	 *
 	 * @return URL.
 	 */
 	String getUrl();
+
+	/**
+	 * The URL object.
+	 *
+	 * @return URL.
+	 */
+	URI getUri();
 
 	/**
 	 * Get servlet context used within container.
